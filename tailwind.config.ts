@@ -52,6 +52,15 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				// Parking AI specific colors
+				sensor: {
+					active: 'hsl(var(--sensor-active))',
+					warning: 'hsl(var(--sensor-warning))',
+					danger: 'hsl(var(--sensor-danger))'
+				},
+				trajectory: 'hsl(var(--trajectory))',
+				obstacle: 'hsl(var(--obstacle))',
+				'safe-zone': 'hsl(var(--safe-zone))',
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -84,11 +93,38 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse-glow': {
+					'0%, 100%': {
+						boxShadow: '0 0 20px hsl(195 100% 55% / 0.5)'
+					},
+					'50%': {
+						boxShadow: '0 0 40px hsl(195 100% 55% / 0.8)'
+					}
+				},
+				'scan': {
+					'0%': {
+						transform: 'translateX(-100%)'
+					},
+					'100%': {
+						transform: 'translateX(100%)'
+					}
+				},
+				'float': {
+					'0%, 100%': {
+						transform: 'translateY(0px)'
+					},
+					'50%': {
+						transform: 'translateY(-10px)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+				'scan': 'scan 3s linear infinite',
+				'float': 'float 3s ease-in-out infinite'
 			}
 		}
 	},
