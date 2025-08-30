@@ -36,49 +36,37 @@ export const ParkingLot: React.FC<ParkingLotProps> = ({ isActive, currentPhase, 
   const [currentAction, setCurrentAction] = useState('');
   const animationRef = useRef<NodeJS.Timeout>();
 
-  // Generate advanced trajectory based on scenario
+  // Generate optimized trajectory with faster waypoints
   const generateAdvancedTrajectory = (scenario: string): TrajectoryPoint[] => {
     const trajectories = {
       parallel: [
-        // Approach phase
-        { x: 25, y: 75, rotation: 0, speed: 0.8, gear: 'forward' as const, action: 'Approaching parking space' },
-        { x: 35, y: 65, rotation: 0, speed: 0.6, gear: 'forward' as const, action: 'Positioning for maneuver' },
-        { x: 45, y: 55, rotation: 0, speed: 0.4, gear: 'forward' as const, action: 'Aligning with space' },
+        // Faster approach phase
+        { x: 30, y: 70, rotation: 0, speed: 1.0, gear: 'forward' as const, action: 'Fast approach to parking area' },
+        { x: 45, y: 55, rotation: 0, speed: 0.8, gear: 'forward' as const, action: 'Positioning for maneuver' },
         
-        // Reverse phase with steering
-        { x: 42, y: 52, rotation: -15, speed: 0.3, gear: 'reverse' as const, action: 'Beginning reverse maneuver' },
-        { x: 38, y: 48, rotation: -25, speed: 0.3, gear: 'reverse' as const, action: 'Steering into space' },
-        { x: 35, y: 45, rotation: -35, speed: 0.2, gear: 'reverse' as const, action: 'Continuing reverse' },
-        { x: 32, y: 42, rotation: -25, speed: 0.2, gear: 'reverse' as const, action: 'Straightening wheels' },
-        { x: 30, y: 40, rotation: -15, speed: 0.1, gear: 'reverse' as const, action: 'Fine positioning' },
+        // Quick reverse phase with precise steering
+        { x: 42, y: 50, rotation: -20, speed: 0.7, gear: 'reverse' as const, action: 'Beginning reverse maneuver' },
+        { x: 35, y: 45, rotation: -30, speed: 0.6, gear: 'reverse' as const, action: 'Steering into space' },
+        { x: 30, y: 42, rotation: -15, speed: 0.4, gear: 'reverse' as const, action: 'Straightening position' },
         
-        // Final adjustment
-        { x: 28, y: 38, rotation: 0, speed: 0.1, gear: 'forward' as const, action: 'Final forward adjustment' },
+        // Quick final adjustment
+        { x: 32, y: 40, rotation: 0, speed: 0.3, gear: 'forward' as const, action: 'Final positioning' },
         { x: 30, y: 40, rotation: 0, speed: 0, gear: 'park' as const, action: 'Parking complete' }
       ],
       
       perpendicular: [
-        // Approach and positioning
-        { x: 25, y: 75, rotation: 0, speed: 0.8, gear: 'forward' as const, action: 'Approaching perpendicular space' },
-        { x: 40, y: 70, rotation: 0, speed: 0.6, gear: 'forward' as const, action: 'Positioning for turn' },
-        { x: 55, y: 65, rotation: 15, speed: 0.4, gear: 'forward' as const, action: 'Beginning turn maneuver' },
-        
-        // Turn into space
-        { x: 60, y: 60, rotation: 45, speed: 0.3, gear: 'forward' as const, action: 'Turning into space' },
-        { x: 65, y: 55, rotation: 75, speed: 0.2, gear: 'forward' as const, action: 'Continuing turn' },
-        { x: 68, y: 52, rotation: 90, speed: 0.1, gear: 'forward' as const, action: 'Straightening in space' },
-        
-        // Final positioning
+        // Direct approach
+        { x: 35, y: 70, rotation: 0, speed: 1.0, gear: 'forward' as const, action: 'Fast approach' },
+        { x: 55, y: 65, rotation: 30, speed: 0.8, gear: 'forward' as const, action: 'Beginning turn' },
+        { x: 65, y: 55, rotation: 70, speed: 0.6, gear: 'forward' as const, action: 'Turning into space' },
         { x: 70, y: 50, rotation: 90, speed: 0, gear: 'park' as const, action: 'Parking complete' }
       ],
       
       angled: [
-        // Smooth angled approach
-        { x: 25, y: 75, rotation: 0, speed: 0.8, gear: 'forward' as const, action: 'Approaching angled space' },
-        { x: 40, y: 65, rotation: 10, speed: 0.6, gear: 'forward' as const, action: 'Angling approach' },
-        { x: 50, y: 58, rotation: 25, speed: 0.4, gear: 'forward' as const, action: 'Adjusting angle' },
-        { x: 58, y: 52, rotation: 35, speed: 0.3, gear: 'forward' as const, action: 'Entering space' },
-        { x: 62, y: 48, rotation: 40, speed: 0.2, gear: 'forward' as const, action: 'Fine positioning' },
+        // Smooth angled approach - faster
+        { x: 35, y: 70, rotation: 15, speed: 1.0, gear: 'forward' as const, action: 'Angled approach' },
+        { x: 50, y: 60, rotation: 30, speed: 0.8, gear: 'forward' as const, action: 'Adjusting angle' },
+        { x: 62, y: 48, rotation: 45, speed: 0.4, gear: 'forward' as const, action: 'Entering space' },
         { x: 65, y: 45, rotation: 45, speed: 0, gear: 'park' as const, action: 'Parking complete' }
       ]
     };
@@ -103,49 +91,107 @@ export const ParkingLot: React.FC<ParkingLotProps> = ({ isActive, currentPhase, 
           setCurrentAction(currentTarget.action);
           setIsReversing(currentTarget.gear === 'reverse');
           
-          // Smooth physics-based interpolation
+          // Enhanced physics-based interpolation with faster movement
           setCarPosition(prev => {
             const dx = currentTarget.x - prev.x;
             const dy = currentTarget.y - prev.y;
             const dr = currentTarget.rotation - prev.rotation;
             
-            // Apply realistic acceleration/deceleration
+            // Calculate distance to target
             const distance = Math.sqrt(dx * dx + dy * dy);
+            const rotationDiff = Math.abs(dr);
+            
+            // Enhanced speed control - much faster movement
             const targetSpeed = currentTarget.speed;
-            const acceleration = 0.05;
+            const acceleration = 0.25; // Increased from 0.05 for faster acceleration
             
             let newSpeed = prev.speed;
             if (Math.abs(newSpeed - targetSpeed) > 0.01) {
               newSpeed += (targetSpeed - newSpeed) * acceleration;
             }
             
-            // Calculate movement based on speed and direction
-            const moveDistance = newSpeed * 2;
-            const normalizedDx = distance > 0 ? (dx / distance) * moveDistance : 0;
-            const normalizedDy = distance > 0 ? (dy / distance) * moveDistance : 0;
-            
-            // Smooth rotation with realistic turning radius
-            let rotationSpeed = 0.15;
-            if (currentTarget.gear === 'reverse') {
-              rotationSpeed *= 0.7; // Slower turning when reversing
+            // Adaptive movement - faster when far, precise when close
+            let moveMultiplier = 8; // Increased base movement speed
+            if (distance < 5) {
+              moveMultiplier = 12; // Even faster for close targets
+            } else if (distance < 2) {
+              moveMultiplier = 15; // Maximum speed for very close targets
             }
             
-            const newRotation = prev.rotation + dr * rotationSpeed;
+            const moveDistance = (newSpeed + 0.3) * moveMultiplier; // Minimum base speed
+            
+            // Direct movement towards target with improved accuracy
+            let newX = prev.x;
+            let newY = prev.y;
+            
+            if (distance > 0.5) { // Move if not very close
+              const normalizedDx = (dx / distance) * moveDistance;
+              const normalizedDy = (dy / distance) * moveDistance;
+              
+              // Prevent overshooting
+              if (Math.abs(normalizedDx) > Math.abs(dx)) {
+                newX = currentTarget.x;
+              } else {
+                newX = prev.x + normalizedDx;
+              }
+              
+              if (Math.abs(normalizedDy) > Math.abs(dy)) {
+                newY = currentTarget.y;
+              } else {
+                newY = prev.y + normalizedDy;
+              }
+            } else {
+              // Snap to target when very close
+              newX = currentTarget.x;
+              newY = currentTarget.y;
+            }
+            
+            // Enhanced rotation with adaptive speed
+            let rotationSpeed = 0.4; // Increased from 0.15
+            if (currentTarget.gear === 'reverse') {
+              rotationSpeed = 0.35; // Slightly slower for reverse but still fast
+            }
+            
+            // Faster rotation when difference is large
+            if (rotationDiff > 20) {
+              rotationSpeed = 0.6;
+            } else if (rotationDiff < 5) {
+              rotationSpeed = 0.8; // Very fast for small adjustments
+            }
+            
+            let newRotation = prev.rotation;
+            if (Math.abs(dr) > 1) {
+              newRotation = prev.rotation + dr * rotationSpeed;
+            } else {
+              // Snap to target rotation when very close
+              newRotation = currentTarget.rotation;
+            }
+            
+            // Check if we've reached the current target
+            const reachedPosition = distance < 1.5 && rotationDiff < 3;
+            
+            if (reachedPosition) {
+              // Move to next waypoint immediately
+              setTimeout(() => {
+                setCurrentTrajectoryIndex(index => Math.min(index + 1, trajectory.length - 1));
+              }, 50);
+            }
             
             return {
-              x: prev.x + normalizedDx,
-              y: prev.y + normalizedDy,
+              x: newX,
+              y: newY,
               rotation: newRotation,
               speed: newSpeed,
               gear: currentTarget.gear
             };
           });
           
-          return prevIndex + 1;
+          return prevIndex;
         });
       };
       
-      animationRef.current = setInterval(animateMovement, 150);
+      // Faster animation frame rate for smoother movement
+      animationRef.current = setInterval(animateMovement, 60); // Reduced from 150ms
       
       return () => {
         if (animationRef.current) {
